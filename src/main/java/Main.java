@@ -26,9 +26,9 @@ public class Main {
     }
 
     private static void watch(Hippodrome hippodrome) throws Exception {
+        System.out.println("\n".repeat(5));
         hippodrome.getHorses().stream()
                 .map(horse -> ".".repeat((int) horse.getDistance()) + horse.getName())
                 .forEach(System.out::println);
-        System.out.println("\n".repeat(10));
     }
 }
