@@ -74,6 +74,24 @@ class HorseTest {
         assertEquals(exceptionMessageWhenDistanceIsNegative, exception.getMessage());
     }
 
+    // Тест конструктора с двумя параметрами, на возвращение третьего значения по умолчанию
+    @Test
+    void testConstructor_ShouldReturnDistance_WhenArgsConstructorIsTwoArgs() {
+        assertEquals(0, new Horse(name, speed).getDistance());
+    }
+
+    @Test
+    @SneakyThrows
+    void testConstructor_ShouldReturnDistance_WhenArgsConstructorIsTwoArgsUseReflection() {
+        double expectedDistance = 0;
+        Horse horse = new Horse(name, speed);
+        Field field = horse.getClass().getDeclaredField("distance");
+        field.setAccessible(true);
+        double actualDistance = (double) field.get(horse);
+
+        assertEquals(expectedDistance, actualDistance);
+    }
+
     @Test
     void testGetName_ShouldReturnName_WhenArgsConstructorIsName() {
         assertEquals("Zephyr", new Horse(name, speed).getName());
@@ -97,6 +115,42 @@ class HorseTest {
     // Проверить, что конструктор с двумя параметрами на третий возвращает 0
     // Более подробное ТЗ в телеге!
 
+    @Test
+    void testGetSpeed_ShouldReturnSpeed_WhenArgsConstructorIsSpeed() {
+        assertEquals(10, new Horse(name, speed).getSpeed());
+
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetSpeed_ShouldReturnSpeed_WhenArgsConstructorIsSpeedUseReflection() {
+        double expectedSpeed = 10;
+        Horse horse = new Horse(name, speed);
+        Field field = horse.getClass().getDeclaredField("speed");
+        field.setAccessible(true);
+        double actualSpeed = (double) field.get(horse);
+
+        assertEquals(expectedSpeed, actualSpeed);
+    }
+
+    @Test
+    void testGetDistance_ShouldReturnDistance_WhenArgsConstructorIsDistance() {
+        assertEquals(10, new Horse(name, speed, distance).getDistance());
+    }
+
+    @Test
+    @SneakyThrows
+    void testGetDistance_ShouldReturnDistance_WhenArgsConstructorIsDistanceUseReflection() {
+        double expectedDistance = 10;
+        Horse horse = new Horse(name, speed, distance);
+        Field field = horse.getClass().getDeclaredField("distance");
+        field.setAccessible(true);
+        double actualDistance = (double) field.get(horse);
+
+        assertEquals(expectedDistance, actualDistance);
+    }
+
+
     // Проверить, что метод вызывает внутри метод getRandomDouble() с параметрами 0.2 и 0.9.
     // Для этого нужно использовать MockedStatic и его метод verify();
     // Проверить, что метод присваивает дистанции значение высчитанное по формуле:
@@ -109,8 +163,5 @@ class HorseTest {
             new Horse(name, speed, distance).move();
             mockedStatic.verify(() -> Horse.getRandomDouble(0.2, 0.9));
         }
-
     }
-
-
 }
