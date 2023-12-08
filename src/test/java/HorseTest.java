@@ -1,9 +1,12 @@
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentMatchers;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.internal.invocation.MockitoMethod;
@@ -11,19 +14,22 @@ import org.mockito.internal.invocation.MockitoMethod;
 import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 class HorseTest {
     //test{Method}_Should{Do}_When{Condition}
 
-    String name = "Zephyr";
-    int speed = 10;
-    double distance = 10;
+    final String name = "Zephyr";
+    final int speed = 10;
+    final double distance = 10;
 
-    String exceptionMessageWhenNameIsNull = "Name cannot be null.";
-    String exceptionMessageWhenNameIsBlank = "Name cannot be blank.";
-    String exceptionMessageWhenSpeedIsNegative = "Speed cannot be negative.";
-    String exceptionMessageWhenDistanceIsNegative = "Distance cannot be negative.";
+    Horse horse;
+
+    @BeforeEach
+    private void init() {
+        horse = new Horse(name, speed, distance);
+    }
 
     @Test
     void testConstructor_ShouldThrowIllegalArgsEx_WhenArgsNameNull() {
@@ -32,8 +38,10 @@ class HorseTest {
 
     @Test
     void testConstructor_ShouldTrowExTextMessage_WhenArgsNameNull() {
+        String exceptionMessage = "Name cannot be null.";
+
         var exception = assertThrows(IllegalArgumentException.class, () -> new Horse(null, speed));
-        assertEquals(exceptionMessageWhenNameIsNull, exception.getMessage());
+        assertEquals(exceptionMessage, exception.getMessage());
     }
 
     @ParameterizedTest
@@ -46,8 +54,10 @@ class HorseTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "\t", "\n", "\r", "\f"})
     void testConstructor_ShouldTrowExTextMessage_WhenArgsNameBeBlank(String name) {
+        String exceptionMessage = "Name cannot be blank.";
+
         var exception = assertThrows(IllegalArgumentException.class, () -> new Horse(name, speed));
-        assertEquals(exceptionMessageWhenNameIsBlank, exception.getMessage());
+        assertEquals(exceptionMessage, exception.getMessage());
     }
 
 
@@ -58,8 +68,10 @@ class HorseTest {
 
     @Test
     void testConstructor_ShouldTrowExTextMessage_WhenArgsSpeedLessThenZero() {
+        String exceptionMessage = "Speed cannot be negative.";
+
         var exception = assertThrows(IllegalArgumentException.class, () -> new Horse(name, -speed));
-        assertEquals(exceptionMessageWhenSpeedIsNegative, exception.getMessage());
+        assertEquals(exceptionMessage, exception.getMessage());
     }
 
     @Test
@@ -69,12 +81,13 @@ class HorseTest {
 
     @Test
     void testConstructor_ShouldTrowExTextMessage_WhenArgsDistanceLessThenZero() {
+        String exceptionMessage = "Distance cannot be negative.";
+
         var exception = assertThrows(IllegalArgumentException.class, () ->
                 new Horse(name, speed, -distance));
-        assertEquals(exceptionMessageWhenDistanceIsNegative, exception.getMessage());
+        assertEquals(exceptionMessage, exception.getMessage());
     }
 
-    // Тест конструктора с двумя параметрами, на возвращение третьего значения по умолчанию
     @Test
     void testConstructor_ShouldReturnDistance_WhenArgsConstructorIsTwoArgs() {
         assertEquals(0, new Horse(name, speed).getDistance());
@@ -94,7 +107,7 @@ class HorseTest {
 
     @Test
     void testGetName_ShouldReturnName_WhenArgsConstructorIsName() {
-        assertEquals("Zephyr", new Horse(name, speed).getName());
+        assertEquals("Zephyr", horse.getName());
     }
 
     @Test
@@ -102,21 +115,16 @@ class HorseTest {
     void testGetName_ShouldReturnName_WhenArgsConstructorIsNameUseReflection() {
         String expectedName = "Zephyr";
 
-        Horse horse = new Horse(name, speed);
         Field field = horse.getClass().getDeclaredField("name");
         field.setAccessible(true);
         String actualName = (String) field.get(horse);
 
         assertEquals(expectedName, actualName);
     }
-    // Дописать тесты на геттеры!
-    // На getDistance проверить когда в конструктор передано два параметра
-    // Проверить, что конструктор с двумя параметрами на третий возвращает 0
-    // Более подробное ТЗ в телеге!
 
     @Test
     void testGetSpeed_ShouldReturnSpeed_WhenArgsConstructorIsSpeed() {
-        assertEquals(10, new Horse(name, speed).getSpeed());
+        assertEquals(10, horse.getSpeed());
 
     }
 
@@ -124,7 +132,7 @@ class HorseTest {
     @SneakyThrows
     void testGetSpeed_ShouldReturnSpeed_WhenArgsConstructorIsSpeedUseReflection() {
         double expectedSpeed = 10;
-        Horse horse = new Horse(name, speed);
+
         Field field = horse.getClass().getDeclaredField("speed");
         field.setAccessible(true);
         double actualSpeed = (double) field.get(horse);
@@ -134,14 +142,14 @@ class HorseTest {
 
     @Test
     void testGetDistance_ShouldReturnDistance_WhenArgsConstructorIsDistance() {
-        assertEquals(10, new Horse(name, speed, distance).getDistance());
+        assertEquals(10, horse.getDistance());
     }
 
     @Test
     @SneakyThrows
     void testGetDistance_ShouldReturnDistance_WhenArgsConstructorIsDistanceUseReflection() {
         double expectedDistance = 10;
-        Horse horse = new Horse(name, speed, distance);
+
         Field field = horse.getClass().getDeclaredField("distance");
         field.setAccessible(true);
         double actualDistance = (double) field.get(horse);
@@ -149,18 +157,25 @@ class HorseTest {
         assertEquals(expectedDistance, actualDistance);
     }
 
-
-    // Проверить, что метод вызывает внутри метод getRandomDouble() с параметрами 0.2 и 0.9.
-    // Для этого нужно использовать MockedStatic и его метод verify();
-    // Проверить, что метод присваивает дистанции значение высчитанное по формуле:
-    // distance + speed * getRandomDouble(0.2, 0.9). Для этого нужно замокать getRandomDouble(),
-    // чтобы он возвращал определенные значения, которые нужно задать параметризовав тест.
-
     @Test
-    void testMove() {
+    void testMove() { // написать нормальное название теста
         try (MockedStatic<Horse> mockedStatic = Mockito.mockStatic(Horse.class)) {
-            new Horse(name, speed, distance).move();
-            mockedStatic.verify(() -> Horse.getRandomDouble(0.2, 0.9));
+            horse.move();
+            mockedStatic.verify(() -> Horse.getRandomDouble(eq(0.2), eq(0.9)));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {0, 0.1, 0.7, 4, 8, 100})
+    void testMove1(Double fakeValue) { // написать нормальное название теста
+        double expectedDistance = horse.getDistance() + horse.getSpeed() * fakeValue;
+
+        try(MockedStatic<Horse> mockedStatic = Mockito.mockStatic(Horse.class)) {
+            mockedStatic.when(() -> Horse.getRandomDouble(0.2, 0.9)).thenReturn(fakeValue);
+            horse.move();
+            double actualDistance = horse.getDistance();
+
+            assertEquals(expectedDistance, actualDistance);
         }
     }
 }
