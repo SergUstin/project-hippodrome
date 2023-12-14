@@ -1,7 +1,10 @@
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+@Slf4j
 public class Main {
 
     @SneakyThrows
@@ -16,6 +19,7 @@ public class Main {
                 new Horse("Cherry", 3)
         );
         Hippodrome hippodrome = new Hippodrome(horses);
+        log.info("Начало скачек. Количество участников:" + horses.size());
 
         for (int i = 0; i < 100; i++) {
             hippodrome.move();
@@ -25,6 +29,7 @@ public class Main {
 
         String winnerName = hippodrome.getWinner().getName();
         System.out.println(winnerName + " wins!");
+        log.debug("Окончание скачек. Победитель: " + winnerName);
     }
 
     private static void watch(Hippodrome hippodrome) {
