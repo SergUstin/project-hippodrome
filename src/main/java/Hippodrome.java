@@ -23,8 +23,8 @@ public class Hippodrome {
             throw new IllegalArgumentException("Horses cannot be empty.");
         }
 
+        log.debug("Создание Hippodrome, лошадей [{}]", horses.size());
         this.horses = horses;
-        log.debug("Создание Hippodrome, лошадей [" + horses.size());
     }
 
     public List<Horse> getHorses() {
